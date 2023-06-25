@@ -5,7 +5,11 @@ export async function GET(request: Request) {
   // read potato.txt from the path of this module
   try {
     const test = await readFile(
-      path.join(path.dirname(fileURLToPath(import.meta.url)), "potato.txt"),
+      path.join(
+        path.dirname(fileURLToPath(import.meta.url)),
+        "../",
+        "potato.txt"
+      ),
       "utf8"
     );
     //   const test = await readFile("./potato.txt", "utf8");
