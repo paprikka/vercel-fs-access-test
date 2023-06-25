@@ -1,95 +1,71 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import Image from "next/image";
+import styles from "./page.module.css";
+import { ChangeEventHandler, useReducer, useRef, useState } from "react";
+import useSWR from "swr";
+import { CommunityEntry } from "./data/types";
+
+const debounce = <T extends (...args: any[]) => any>(
+  fn: T,
+  delay: number
+): T => {
+  let timer: NodeJS.Timeout;
+  return ((...args: any[]) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  }) as any;
+};
+
+const fetcher = (query: string) => {
+  const params = new URLSearchParams({ query });
+  return fetch("/api/search?" + params).then(
+    (_) => _.json() as Promise<CommunityEntry[]>
+  );
+};
 
 export default function Home() {
+  const [search, setSearch] = useState("");
+  const [searchInputValue, setSearchInputValue] = useState("");
+  const { data, error, isLoading } = useSWR(search, fetcher);
+
+  const debouncedSetSearch = useRef(debounce(setSearch, 0));
+
+  const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    setSearchInputValue(e.target.value);
+    debouncedSetSearch.current(e.target.value);
+  };
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+      <header>
+        <input
+          type="search"
+          value={searchInputValue}
+          onChange={handleInputChange}
         />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      </header>
+      {isLoading && <div>Loading...</div>}
+      {data ? (
+        <ul>
+          {data.map((entry) => {
+            return (
+              <li key={entry.id}>
+                <strong>
+                  {" "}
+                  <a href={`https://${entry.instanceDomain}/c/${entry.name}`}>
+                    {entry.name}
+                  </a>
+                </strong>
+                <details>
+                  <summary>Description</summary>
+                  <p>{entry.description}</p>
+                </details>
+                <br />
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
     </main>
-  )
+  );
 }
