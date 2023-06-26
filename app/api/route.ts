@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       take: 10,
     });
     //   const test = await readFile("./potato.txt", "utf8");
-    return new Response(JSON.stringify(communities, null, 2));
+    return new Response(JSON.stringify({ dbPath, communities }, null, 2));
   } catch (error) {
     return new Response((error as unknown as Error)?.message);
   }
