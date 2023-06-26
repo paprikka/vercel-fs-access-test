@@ -1,8 +1,10 @@
+import { logDir } from "@/app/utils/log-dir";
 import { getClient } from "../db";
 
 let i = 1;
 export async function GET(request: Request) {
-  const client = await getClient();
+  logDir("/vercel/path0/app/");
+  const client = getClient();
   const query = new URL(request.url).searchParams.get("query");
 
   if (!query) {

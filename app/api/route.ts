@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-import { readFile } from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
+import { logDir } from "../utils/log-dir";
 import { getClient } from "./db";
 export async function GET(request: Request) {
+  logDir("/vercel/path0/app/");
+
   const client = getClient();
 
   try {
