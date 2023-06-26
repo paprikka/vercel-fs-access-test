@@ -7,6 +7,7 @@ export const getClient = () => {
   if (client) {
     return client;
   }
+
   const dbPath = path.join(
     path.dirname(fileURLToPath(import.meta.url)),
     "../",

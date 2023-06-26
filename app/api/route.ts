@@ -2,15 +2,9 @@ import { PrismaClient } from "@prisma/client";
 import { readFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import { getClient } from "./db";
 export async function GET(request: Request) {
-  const dbPath = path.join(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../",
-    "potato.db"
-  );
-  const client = new PrismaClient({
-    datasources: { db: { url: `file:${dbPath}` } },
-  });
+  const client = getClient();
 
   try {
     const communities = await client.community.findMany({
@@ -18,7 +12,7 @@ export async function GET(request: Request) {
       take: 10,
     });
     //   const test = await readFile("./potato.txt", "utf8");
-    return new Response(JSON.stringify({ dbPath, communities }, null, 2));
+    return new Response(JSON.stringify({ communities }, null, 2));
   } catch (error) {
     return new Response((error as unknown as Error)?.message);
   }
